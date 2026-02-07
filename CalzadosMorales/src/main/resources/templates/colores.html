@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Calzados Morales - Categorías</title>
+    <title>Calzados Morales - Colores</title>
     
     <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
@@ -13,7 +13,6 @@
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
 
     <style>
-            /* 1. Arreglar el Combo Box (Mostrar 10) */
             .dataTables_length select {
                 background-color: #ffffff !important;
                 border: 1px solid #ebedf2 !important;
@@ -24,23 +23,13 @@
                 height: 35px !important;
                 background-position: right 10px center !important;
             }
-
-            /* 2. Paginación Morada */
             .page-item.active .page-link {
                 background-color: #9a55ff !important;
                 border-color: #9a55ff !important;
                 color: white !important;
             }
-            
-            .page-link {
-                color: #9a55ff !important;
-            }
-            
-            .page-link:hover {
-                background-color: #f2e8ff !important;
-            }
-
-            /* 3. Ajuste del buscador */
+            .page-link { color: #9a55ff !important; }
+            .page-link:hover { background-color: #f2e8ff !important; }
             .dataTables_filter input {
                 border: 1px solid #ebedf2 !important;
                 padding: 5px 10px !important;
@@ -63,11 +52,10 @@
                     <div class="page-header">
                         <h3 class="page-title">
                             <span class="page-title-icon bg-gradient-primary text-white me-2">
-                                <i class="mdi mdi-package-variant"></i>
-                            </span> Gestión de Categorías
+                                <i class="mdi mdi-palette"></i> </span> Gestión de Colores
                         </h3>
-                        <button type="button" class="btn btn-gradient-primary btn-fw" onclick="limpiarModal()" data-bs-toggle="modal" data-bs-target="#modalCategoria">
-                            <i class="mdi mdi-plus"></i> Nueva Categoría
+                        <button type="button" class="btn btn-gradient-primary btn-fw" onclick="limpiarModal()" data-bs-toggle="modal" data-bs-target="#modalColor">
+                            <i class="mdi mdi-plus"></i> Nuevo Color
                         </button>
                     </div>
 
@@ -75,10 +63,10 @@
                         <div class="col-lg-12 grid-margin stretch-card">
                             <div class="card">
                                 <div class="card-body">
-                                    <h4 class="card-title">Listado de Categorías</h4>
+                                    <h4 class="card-title">Listado de Colores</h4>
                                     
                                     <div class="table-responsive">
-                                        <table id="tablaCategorias" class="table table-hover table-striped">
+                                        <table id="tablaColores" class="table table-hover table-striped">
                                             <thead>
                                                 <tr>
                                                     <th>ID</th>
@@ -88,36 +76,36 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <tr th:each="cat : ${categorias}">
-                                                    <td th:text="${cat.id_categoria}"></td>
-                                                    <td th:text="${cat.nombre}"></td>
+                                                <tr th:each="col : ${colores}">
+                                                    <td th:text="${col.id_color}"></td>
+                                                    <td th:text="${col.nombre}"></td>
                                                     
                                                     <td>
-                                                        <label class="badge badge-success" th:if="${cat.estado}">Activo</label>
-                                                        <label class="badge badge-danger" th:unless="${cat.estado}">Inactivo</label>
+                                                        <label class="badge badge-success" th:if="${col.estado}">Activo</label>
+                                                        <label class="badge badge-danger" th:unless="${col.estado}">Inactivo</label>
                                                     </td>
                                                     
                                                     <td>
                                                         <div class="d-inline-flex align-items-center gap-2">
-                                                            <div th:if="${cat.estado}">
+                                                            <div th:if="${col.estado}">
                                                                 <button class="btn btn-sm btn-inverse-info btn-icon d-inline-flex align-items-center justify-content-center" 
                                                                         onclick="cargarDatos(this)" 
-                                                                        th:data-id="${cat.id_categoria}" 
-                                                                        th:data-nombre="${cat.nombre}"
-                                                                        data-bs-toggle="modal" data-bs-target="#modalCategoria"
+                                                                        th:data-id="${col.id_color}" 
+                                                                        th:data-nombre="${col.nombre}"
+                                                                        data-bs-toggle="modal" data-bs-target="#modalColor"
                                                                         title="Editar" style="margin-right: 5px;">
                                                                     <i class="mdi mdi-pencil"></i>
                                                                 </button>
                                                                 
-                                                                <a th:href="@{/categorias/cambiarEstado/} + ${cat.id_categoria} + '/false'" 
+                                                                <a th:href="@{/colores/cambiarEstado/} + ${col.id_color} + '/false'" 
                                                                    class="btn btn-sm btn-inverse-danger btn-icon d-inline-flex align-items-center justify-content-center" 
                                                                    title="Desactivar">
                                                                     <i class="mdi mdi-close-circle-outline"></i>
                                                                 </a>
                                                             </div>
 
-                                                            <div th:unless="${cat.estado}">
-                                                                <a th:href="@{/categorias/cambiarEstado/} + ${cat.id_categoria} + '/true'" 
+                                                            <div th:unless="${col.estado}">
+                                                                <a th:href="@{/colores/cambiarEstado/} + ${col.id_color} + '/true'" 
                                                                    class="btn btn-sm btn-inverse-success btn-icon d-inline-flex align-items-center justify-content-center" 
                                                                    title="Activar">
                                                                     <i class="mdi mdi-check-circle-outline"></i>
@@ -135,21 +123,21 @@
                     </div>
                 </div>
 
-                <div class="modal fade" id="modalCategoria" tabindex="-1" aria-hidden="true">
+                <div class="modal fade" id="modalColor" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="modalTitle">Nueva Categoría</h5>
+                                <h5 class="modal-title" id="modalTitle">Nuevo Color</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             
-                            <form th:action="@{/categorias/guardar}" method="post" th:object="${categoria}" class="needs-validation" novalidate>
+                            <form th:action="@{/colores/guardar}" method="post" th:object="${color}" class="needs-validation" novalidate>
                                 <div class="modal-body">
-                                    <input type="hidden" id="id_categoria" th:field="*{id_categoria}">
+                                    <input type="hidden" id="id_color" th:field="*{id_color}">
                                     
                                     <div class="form-group">
-                                        <label>Nombre de Categoría</label>
-                                        <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required placeholder="Ej: Sandalias">
+                                        <label>Nombre del Color</label>
+                                        <input type="text" class="form-control" id="nombre" th:field="*{nombre}" required placeholder="Ej: Rojo Pasión">
                                         <div class="invalid-feedback">
                                             Por favor ingrese un nombre.
                                         </div>
@@ -173,102 +161,91 @@
         </div>
     </div>
 
-    <script src="/assets/vendors/js/vendor.bundle.base.js"></script>
-    <script src="/assets/js/off-canvas.js"></script>
-    <script src="/assets/js/misc.js"></script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+	<script src="/assets/vendors/js/vendor.bundle.base.js"></script>
+	    <script src="/assets/js/off-canvas.js"></script>
+	    <script src="/assets/js/misc.js"></script>
+	    
+	    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+	    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
-    <script>
-        // 1. INICIALIZAR DATATABLES
-        $(document).ready(function() {
-            $('#tablaCategorias').DataTable({
-                "language": {
-                    "lengthMenu": "Mostrar _MENU_ registros",
-                    "zeroRecords": "No se encontraron coincidencias",
-                    "info": "Página _PAGE_ de _PAGES_",
-                    "infoEmpty": "Sin registros",
-                    "infoFiltered": "(filtrado de _MAX_)",
-                    "search": "Buscar:",
-                    "paginate": {
-                        "first": "Primero",
-                        "last": "Último",
-                        "next": "Siguiente",
-                        "previous": "Anterior"
-                    }
-                },
-                "pageLength": 10
-            });
+	    <script>
+	        // 1. INICIALIZAR DATATABLES
+	        $(document).ready(function() {
+	            $('#tablaColores').DataTable({
+	                "language": {
+	                    "lengthMenu": "Mostrar _MENU_ registros",
+	                    "zeroRecords": "No se encontraron coincidencias",
+	                    "info": "Página _PAGE_ de _PAGES_",
+	                    "infoEmpty": "Sin registros",
+	                    "infoFiltered": "(filtrado de _MAX_)",
+	                    "search": "Buscar:",
+	                    "paginate": { "first": "Primero", "last": "Último", "next": "Siguiente", "previous": "Anterior" }
+	                },
+	                "pageLength": 10
+	            });
+
+	           
+	            $('#nombre').on('input', function() {
+	                var valor = $(this).val();
+	                // Reemplaza cualquier cosa que NO sea letra (a-z), Ñ, acentos o espacios por "nada"
+	                var soloLetras = valor.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '');
+	                $(this).val(soloLetras);
+	            });
+				
+				// Al abrir el modal, poner el cursor en el campo nombre automáticamente
+				$('#modalColor').on('shown.bs.modal', function () {
+				    $('#nombre').trigger('focus');
+				});
+	        });
 			
-			// Al abrir el modal, poner el cursor en el campo nombre automáticamente
-			$('#modalCategoria').on('shown.bs.modal', function () {
-			    $('#nombre').trigger('focus');
-			});
-        });
+			
+			
 
-        // 2. VALIDACIÓN BOOTSTRAP
-        (function () {
-          'use strict'
-          var forms = document.querySelectorAll('.needs-validation')
-          Array.prototype.slice.call(forms)
-            .forEach(function (form) {
-              form.addEventListener('submit', function (event) {
-                if (!form.checkValidity()) {
-                  event.preventDefault()
-                  event.stopPropagation()
-                }
-                form.classList.add('was-validated')
-              }, false)
-            })
-        })()
+	        // 2. VALIDACIÓN BOOTSTRAP (Campos vacíos)
+	        (function () {
+	          'use strict'
+	          var forms = document.querySelectorAll('.needs-validation')
+	          Array.prototype.slice.call(forms).forEach(function (form) {
+	              form.addEventListener('submit', function (event) {
+	                if (!form.checkValidity()) {
+	                  event.preventDefault(); event.stopPropagation();
+	                }
+	                form.classList.add('was-validated');
+	              }, false)
+	            })
+	        })();
 
-        // 3. CARGAR DATOS
-        function cargarDatos(elemento) {
-            var id = elemento.getAttribute('data-id');
-            var nombre = elemento.getAttribute('data-nombre');
-            document.getElementById('id_categoria').value = id;
-            document.getElementById('nombre').value = nombre;
-            document.getElementById('modalTitle').innerText = "Editar Categoría";
-            document.querySelector('.needs-validation').classList.remove('was-validated');
-        }
+	        // 3. CARGAR DATOS (Editar)
+	        function cargarDatos(elemento) {
+	            var id = elemento.getAttribute('data-id');
+	            var nombre = elemento.getAttribute('data-nombre');
+	            document.getElementById('id_color').value = id;
+	            document.getElementById('nombre').value = nombre;
+	            document.getElementById('modalTitle').innerText = "Editar Color";
+	            document.querySelector('.needs-validation').classList.remove('was-validated');
+	        }
 
-        // 4. LIMPIAR
-        function limpiarModal() {
-            document.getElementById('id_categoria').value = '';
-            document.getElementById('nombre').value = '';
-            document.getElementById('modalTitle').innerText = "Nueva Categoría";
-            document.querySelector('.needs-validation').classList.remove('was-validated');
-        }
-    </script>
+	        // 4. LIMPIAR MODAL (Nuevo)
+	        function limpiarModal() {
+	            document.getElementById('id_color').value = '';
+	            document.getElementById('nombre').value = '';
+	            document.getElementById('modalTitle').innerText = "Nuevo Color";
+	            document.querySelector('.needs-validation').classList.remove('was-validated');
+	        }
+	    </script>
 
-    <script th:if="${success != null}">
-        Swal.fire({
-            icon: 'success',
-            title: '¡Éxito!',
-            text: "[(${success})]", 
-            confirmButtonColor: '#9a55ff'
-        });
-    </script>
+	    <script th:if="${success != null}">
+	        Swal.fire({ icon: 'success', title: '¡Éxito!', text: "[(${success})]", confirmButtonColor: '#9a55ff' });
+	    </script>
 
-    <script th:if="${error != null}">
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: "[(${error})]",
-            confirmButtonColor: '#d33'
-        });
-    </script>
+	    <script th:if="${error != null}">
+	        Swal.fire({ icon: 'error', title: 'Error', text: "[(${error})]", confirmButtonColor: '#d33' });
+	    </script>
 
-    <script th:if="${info != null}">
-        Swal.fire({
-            icon: 'info',
-            title: 'Información',
-            text: "[(${info})]",
-            confirmButtonColor: '#9a55ff'
-        });
-    </script>
+	    <script th:if="${info != null}">
+	        Swal.fire({ icon: 'info', title: 'Información', text: "[(${info})]", confirmButtonColor: '#9a55ff' });
+	    </script>
 
 </body>
 </html>
