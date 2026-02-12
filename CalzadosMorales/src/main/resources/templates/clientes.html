@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Calzados Morales - Clientes</title>
+    
+    <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
+    <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
+    <link rel="stylesheet" href="/assets/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    
+    <style>
+        /* Paginación Morada */
+        .page-item.active .page-link { background-color: #9a55ff !important; border-color: #9a55ff !important; color: white !important; }
+        .page-link { color: #9a55ff !important; }
+        
+        /* DataTable Bonito */
+        .dataTables_length label { display: flex !important; align-items: center !important; margin-bottom: 1rem; }
+        .dataTables_length select { background-color: #fff !important; border: 1px solid #ebedf2 !important; padding: 5px 25px 5px 10px !important; border-radius: 4px !important; margin: 0 10px !important; min-width: 70px; }
+        .dataTables_filter input { border: 1px solid #ebedf2 !important; padding: 5px 10px !important; border-radius: 4px !important; margin-left: 0.5rem; }
+        .dataTables_filter input:focus { border-color: #9a55ff !important; outline: none !important; }
+        
+        /* BOTONES CENTRADOS PERFECTOS */
+        .btn-icon-center {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 35px; height: 35px; padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-scroller">
+        <nav th:replace="~{fragmentos/navbar :: navbar}"></nav>
+        
+        <div class="container-fluid page-body-wrapper">
+            <nav th:replace="~{fragmentos/sidebar :: sidebar}"></nav>
+
+            <div class="main-panel">
+                <div class="content-wrapper">
+                    
+                    <div class="page-header">
+                        <h3 class="page-title">
+                            <span class="page-title-icon bg-gradient-primary text-white me-2">
+                                <i class="mdi mdi-account-multiple"></i>
+                            </span> Gestión de Clientes
+                        </h3>
+                        <button type="button" class="btn btn-gradient-primary btn-fw" onclick="abrirModalNuevo()">
+                            <i class="mdi mdi-plus"></i> Nuevo Cliente
+                        </button>
+                    </div>
+
+                    <!-- TABLA ÚNICA DE TODOS LOS CLIENTES -->
+                    <div class="row">
+                        <div class="col-lg-12 grid-margin stretch-card">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h4 class="card-title">Listado General de Clientes</h4>
+                                    <div class="table-responsive">
+                                        <table id="tablaClientes" class="table table-hover table-striped">
+                                            <thead>
+                                                <tr>
+													<th>ID</th>
+                                                    <th>DNI/RUC</th>
+                                                    <th>Tipo</th>
+                                                    <th>Nombre / Razón Social</th>
+                                                    <th>Teléfono</th>
+                                                    <th>Email</th>
+                                                    <th>Estado</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- PERSONAS NATURALES -->
+                                                <tr th:each="p : ${personasNaturales}">
+													<td th:text="${p.id_cliente}"></td>
+                                                    <td th:text="${p.dni}"></td>
+                                                    <td><span class="badge badge-info">Natural</span></td>
+                                                    <td th:text="${p.nombre + ' ' + p.apellido}"></td>
+                                                    <td th:text="${p.telefono}"></td>
+                                                    <td th:text="${p.email}"></td>
+                                                    <td>
+                                                        <label class="badge badge-success" th:if="${p.estado}">Activo</label>
+                                                        <label class="badge badge-danger" th:unless="${p.estado}">Inactivo</label>
+                                                    </td>
+                                                    <td>
+                                                        <div th:if="${p.estado}" class="d-inline-flex gap-1">
+                                                            <a th:href="@{/clientes/cambiarEstado/} + ${p.id_cliente} + '/false/natural'" 
+                                                               class="btn btn-sm btn-inverse-danger btn-icon-center" 
+                                                               title="Desactivar">
+                                                                <i class="mdi mdi-delete"></i>
+                                                            </a>
+                                                        </div>
+                                                        <div th:unless="${p.estado}">
+                                                            <a th:href="@{/clientes/cambiarEstado/} + ${p.id_cliente} + '/true/natural'" 
+                                                               class="btn btn-sm btn-inverse-success btn-icon-center" 
+                                                               title="Activar">
+                                                                <i class="mdi mdi-check"></i>
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+
+                                                <!-- PERSONAS JURÍDICAS -->
+                                                <tr th:each="e : ${personasJuridicas}">
+													<td th:text="${e.id_cliente}"></td>
+                                                    <td th:text="${e.ruc}"></td>
+                                                    <td><span class="badge badge-warning">Jurídica</span></td>
+                                                    <td th:text="${e.razonSocial}"></td>
+                                                    <td th:text="${e.telefono}"></td>
+                                                    <td th:text="${e.email}"></td>
+                                                    <td>
+                                                        <label class="badge badge-success" th:if="${e.estado}">Activo</label>
+                                                        <label class="badge badge-danger" th:unless="${e.estado}">Inactivo</label>
+                                                    </td>
+                                                    <td>
+                                                        <div th:if="${e.estado}" class="d-inline-flex gap-1">
+                                                            <a th:href="@{/clientes/cambiarEstado/} + ${e.id_cliente} + '/false/juridica'" 
+                                                               class="btn btn-sm btn-inverse-danger btn-icon-center" 
+                                                               title="Desactivar">
+                                                                <i class="mdi mdi-delete"></i>
+                                                            </a>
+                                                        </div>
+                                                        <div th:unless="${e.estado}">
+                                                            <a th:href="@{/clientes/cambiarEstado/} + ${e.id_cliente} + '/true/juridica'" 
+                                                               class="btn btn-sm btn-inverse-success btn-icon-center" 
+                                                               title="Activar">
+                                                                <i class="mdi mdi-check"></i>
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL -->
+                <div class="modal fade" id="modalCliente" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="modalTitle">Nuevo Cliente</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            
+                            <form id="formCliente" method="post" class="needs-validation" novalidate>
+                                <div class="modal-body">
+                                    
+                                    <!-- TIPO DE CLIENTE -->
+                                    <div class="form-group mb-3">
+                                        <label>Tipo de Cliente</label>
+                                        <select class="form-control" id="selectTipo" name="tipoCliente">
+                                            <option value="natural">Persona Natural</option>
+                                            <option value="juridica">Persona Jurídica</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- BLOQUE PERSONA NATURAL -->
+                                    <div id="bloqueNatural">
+                                        <div class="form-group mb-3">
+                                            <label>DNI</label>
+                                            <input type="text" name="dni" id="dni" placeholder="8 dígitos" 
+                                                   maxlength="8" class="form-control" required>
+                                            <div class="invalid-feedback">Ingrese un DNI válido.</div>
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label>Nombre</label>
+                                            <input type="text" name="nombre" id="nombre" placeholder="Nombre" 
+                                                   class="form-control" required>
+                                            <div class="invalid-feedback">Ingrese el nombre.</div>
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label>Apellido</label>
+                                            <input type="text" name="apellido" id="apellido" placeholder="Apellido" 
+                                                   class="form-control" required>
+                                            <div class="invalid-feedback">Ingrese el apellido.</div>
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label>Género</label>
+                                            <select name="genero" id="genero" class="form-control" required>
+                                                <option value="1">Masculino</option>
+                                                <option value="0">Femenino</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <!-- BLOQUE PERSONA JURÍDICA -->
+                                    <div id="bloqueJuridica" style="display:none;">
+                                        <div class="form-group mb-3">
+                                            <label>RUC</label>
+                                            <input type="text" name="ruc" id="ruc" placeholder="11 dígitos" 
+                                                   maxlength="11" class="form-control">
+                                            <div class="invalid-feedback">Ingrese un RUC válido.</div>
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label>Razón Social</label>
+                                            <input type="text" name="razonSocial" id="razonSocial" 
+                                                   placeholder="Nombre de la empresa" class="form-control">
+                                            <div class="invalid-feedback">Ingrese la razón social.</div>
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label>Representante Legal</label>
+                                            <input type="text" name="repreLegal" id="repreLegal" 
+                                                   placeholder="Nombre del representante" class="form-control">
+                                            <div class="invalid-feedback">Ingrese el representante.</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- CAMPOS COMUNES -->
+                                    <div class="form-group mb-3">
+                                        <label>Teléfono</label>
+                                        <input type="text" name="telefono" id="telefono" placeholder="9 dígitos" 
+                                               maxlength="9" class="form-control" required>
+                                        <div class="invalid-feedback">Ingrese un teléfono válido.</div>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label>Email</label>
+                                        <input type="email" name="email" id="email" placeholder="ejemplo@correo.com" 
+                                               class="form-control" required>
+                                        <div class="invalid-feedback">Ingrese un email válido.</div>
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label>Dirección</label>
+                                        <input type="text" name="direccion" id="direccion" placeholder="Dirección completa" 
+                                               class="form-control" required>
+                                        <div class="invalid-feedback">Ingrese la dirección.</div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary">Guardar Cliente</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <footer class="footer">
+                    <div class="d-sm-flex justify-content-center justify-content-sm-between">
+                        <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2026 Calzados Morales</span>
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ SCRIPTS EN EL ORDEN CORRECTO -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/assets/vendors/js/vendor.bundle.base.js"></script>
+    <script src="/assets/js/off-canvas.js"></script>
+    <script src="/assets/js/misc.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        var myModal;
+
+        $(document).ready(function() {
+            // INICIALIZAR MODAL
+            var modalElement = document.getElementById('modalCliente');
+            if (modalElement) {
+                myModal = new bootstrap.Modal(modalElement);
+            }
+
+            // INICIALIZAR DATATABLE
+            $('#tablaClientes').DataTable({
+                "language": {
+                    "lengthMenu": "Mostrar _MENU_ registros",
+                    "zeroRecords": "No se encontraron coincidencias",
+                    "info": "Mostrando del _START_ al _END_ de _TOTAL_ registros",
+                    "infoEmpty": "Sin registros disponibles",
+                    "infoFiltered": "(filtrado de _MAX_ registros totales)",
+                    "search": "Buscar:",
+                    "paginate": {
+                        "first": "Primero",
+                        "last": "Último",
+                        "next": "Siguiente",
+                        "previous": "Anterior"
+                    }
+                },
+                "pageLength": 10
+            });
+
+            // ALTERNAR CAMPOS SEGÚN TIPO
+            $('#selectTipo').change(function() {
+                if($(this).val() === 'natural') {
+                    $('#bloqueNatural').show();
+                    $('#bloqueJuridica').hide();
+                    $('#ruc, #razonSocial, #repreLegal').val('').removeAttr('required');
+                    $('#dni, #nombre, #apellido, #genero').attr('required', 'required');
+                } else {
+                    $('#bloqueNatural').hide();
+                    $('#bloqueJuridica').show();
+                    $('#dni, #nombre, #apellido').val('').removeAttr('required');
+                    $('#genero').removeAttr('required');
+                    $('#ruc, #razonSocial, #repreLegal').attr('required', 'required');
+                }
+            });
+
+            // VALIDAR SOLO NÚMEROS
+            $('#dni, #ruc, #telefono').on('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+
+            // VALIDAR SOLO LETRAS
+            $('#nombre, #apellido, #repreLegal').on('input', function() {
+                this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '');
+            });
+
+            // ENVIAR AL ENDPOINT CORRECTO
+            $('#formCliente').submit(function(e) {
+                e.preventDefault();
+                var tipo = $('#selectTipo').val();
+                var action = tipo === 'natural' ? '/clientes/guardarNatural' : '/clientes/guardarJuridica';
+                $(this).attr('action', action);
+                this.submit();
+            });
+
+            // VALIDACIÓN BOOTSTRAP
+            (function () {
+              'use strict'
+              var forms = document.querySelectorAll('.needs-validation')
+              Array.prototype.slice.call(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                  if (!form.checkValidity()) {
+                    event.preventDefault(); event.stopPropagation();
+                  }
+                  form.classList.add('was-validated');
+                }, false)
+              })
+            })()
+        });
+
+        function abrirModalNuevo() {
+            limpiarModal();
+            if(myModal) myModal.show();
+        }
+
+        function limpiarModal() {
+            $('#formCliente')[0].reset();
+            $('#selectTipo').val('natural').trigger('change');
+            $('#bloqueNatural').show();
+            $('#bloqueJuridica').hide();
+            document.getElementById('modalTitle').innerText = "Nuevo Cliente";
+            
+            // Limpiar validación
+            var form = document.querySelector('.needs-validation');
+            if (form) form.classList.remove('was-validated');
+        }
+    </script>
+    
+    <script th:if="${success != null}">
+        Swal.fire({ icon: 'success', title: '¡Éxito!', text: "[(${success})]", confirmButtonColor: '#9a55ff' });
+    </script>
+    <script th:if="${error != null}">
+        Swal.fire({ icon: 'error', title: 'Error', text: "[(${error})]", confirmButtonColor: '#d33' });
+    </script>
+    <script th:if="${info != null}">
+        Swal.fire({ icon: 'info', title: 'Información', text: "[(${info})]", confirmButtonColor: '#9a55ff' });
+    </script>
+</body>
+</html>
