@@ -3,6 +3,7 @@ package com.calzadosmorales.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -10,6 +11,8 @@ import com.calzadosmorales.entity.PersonaNatural;
 import com.calzadosmorales.entity.PersonaJuridica;
 import com.calzadosmorales.entity.Cliente;
 import com.calzadosmorales.service.ClienteService;
+
+import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping("/clientes")
@@ -22,108 +25,110 @@ public class ClienteController {
     public String listar(Model model) {
         model.addAttribute("personasNaturales", service.listarPersonasNaturales());
         model.addAttribute("personasJuridicas", service.listarPersonasJuridicas());
+        model.addAttribute("personaNatural", new PersonaNatural());
+        model.addAttribute("personaJuridica", new PersonaJuridica());
         return "clientes";
     }
 
+    // ==================== PERSONA NATURAL ====================
+
     @PostMapping("/guardarNatural")
     public String guardarPersonaNatural(
-            @RequestParam String dni,
-            @RequestParam String nombre,
-            @RequestParam String apellido,
-            @RequestParam Integer genero,
-            @RequestParam String telefono,
-            @RequestParam String email,
-            @RequestParam String direccion,
+            @Valid @ModelAttribute("personaNatural") PersonaNatural persona,
+            BindingResult result,
+            Model model,
             RedirectAttributes flash) {
 
-        // Validar DNI duplicado
-        PersonaNatural existeDni = service.buscarPorDni(dni);
-        if (existeDni != null) {
-            flash.addFlashAttribute("error", "El DNI '" + dni + "' ya está registrado.");
-            return "redirect:/clientes";
+        if (result.hasErrors()) {
+            model.addAttribute("personasNaturales", service.listarPersonasNaturales());
+            model.addAttribute("personasJuridicas", service.listarPersonasJuridicas());
+            model.addAttribute("personaJuridica", new PersonaJuridica());
+            model.addAttribute("modalOpenNatural", true);
+            return "clientes";
         }
 
-        // Validar Email duplicado
-        Cliente existeEmail = service.buscarPorEmail(email);
-        if (existeEmail != null) {
-            flash.addFlashAttribute("error", "El Email '" + email + "' ya está registrado.");
+        // --- CORRECCIÓN DEL ESTADO INACTIVO ---
+        if (persona.getId_cliente() != null) {
+            // Es una EDICIÓN: Buscamos el original en BD
+            PersonaNatural original = service.buscarPersonaNaturalPorId(persona.getId_cliente());
+            if (original != null) {
+                persona.setEstado(original.getEstado()); // MANTENEMOS SU ESTADO
+                persona.setFecha_registro(original.getFecha_registro()); // MANTENEMOS SU FECHA
+            }
+        }
+        // --------------------------------------
+
+        // Validar Duplicados (Solo si es nuevo ID o cambia el dato)
+        PersonaNatural existeDni = service.buscarPorDni(persona.getDni());
+        if (existeDni != null && !existeDni.getId_cliente().equals(persona.getId_cliente())) {
+            flash.addFlashAttribute("error", "El DNI " + persona.getDni() + " ya existe.");
             return "redirect:/clientes";
         }
-
-        // Validar Teléfono duplicado
-        Cliente existeTelefono = service.buscarPorTelefono(telefono);
-        if (existeTelefono != null) {
-            flash.addFlashAttribute("error", "El Teléfono '" + telefono + "' ya está registrado.");
-            return "redirect:/clientes";
-        }
-
-        // Crear y guardar
-        PersonaNatural persona = new PersonaNatural();
-        persona.setDni(dni);
-        persona.setNombre(nombre);
-        persona.setApellido(apellido);
-        persona.setGenero(genero);
-        persona.setTelefono(telefono);
-        persona.setEmail(email);
-        persona.setDireccion(direccion);
+        if (validarComunes(persona, flash)) return "redirect:/clientes";
 
         service.guardarPersonaNatural(persona);
-        flash.addFlashAttribute("success", "Persona Natural registrada exitosamente.");
+        flash.addFlashAttribute("success", "Persona Natural guardada correctamente.");
         return "redirect:/clientes";
     }
 
+    // ==================== GUARDAR PERSONA JURÍDICA (CORREGIDO) ====================
     @PostMapping("/guardarJuridica")
     public String guardarPersonaJuridica(
-            @RequestParam String ruc,
-            @RequestParam String razonSocial,
-            @RequestParam String repreLegal,
-            @RequestParam String telefono,
-            @RequestParam String email,
-            @RequestParam String direccion,
+            @Valid @ModelAttribute("personaJuridica") PersonaJuridica persona,
+            BindingResult result,
+            Model model,
             RedirectAttributes flash) {
 
-        // Validar RUC duplicado
-        PersonaJuridica existeRuc = service.buscarPorRuc(ruc);
-        if (existeRuc != null) {
-            flash.addFlashAttribute("error", "El RUC '" + ruc + "' ya está registrado.");
-            return "redirect:/clientes";
+        if (result.hasErrors()) {
+            model.addAttribute("personasNaturales", service.listarPersonasNaturales());
+            model.addAttribute("personasJuridicas", service.listarPersonasJuridicas());
+            model.addAttribute("personaNatural", new PersonaNatural());
+            model.addAttribute("modalOpenJuridica", true);
+            return "clientes";
         }
 
-        // Validar Razón Social duplicada
-        PersonaJuridica existeRazon = service.buscarPorRazonSocial(razonSocial);
-        if (existeRazon != null) {
-            flash.addFlashAttribute("error", "La Razón Social '" + razonSocial + "' ya está registrada.");
+        // --- CORRECCIÓN DEL ESTADO INACTIVO ---
+        if (persona.getId_cliente() != null) {
+            PersonaJuridica original = service.buscarPersonaJuridicaPorId(persona.getId_cliente());
+            if (original != null) {
+                persona.setEstado(original.getEstado()); // MANTENEMOS SU ESTADO
+                persona.setFecha_registro(original.getFecha_registro());
+            }
+        }
+        // --------------------------------------
+
+        PersonaJuridica existeRuc = service.buscarPorRuc(persona.getRuc());
+        if (existeRuc != null && !existeRuc.getId_cliente().equals(persona.getId_cliente())) {
+            flash.addFlashAttribute("error", "El RUC " + persona.getRuc() + " ya existe.");
             return "redirect:/clientes";
         }
-
-        // Validar Email duplicado
-        Cliente existeEmail = service.buscarPorEmail(email);
-        if (existeEmail != null) {
-            flash.addFlashAttribute("error", "El Email '" + email + "' ya está registrado.");
+        PersonaJuridica existeRazon = service.buscarPorRazonSocial(persona.getRazonSocial());
+        if (existeRazon != null && !existeRazon.getId_cliente().equals(persona.getId_cliente())) {
+            flash.addFlashAttribute("error", "La Razón Social ya existe.");
             return "redirect:/clientes";
         }
-
-        // Validar Teléfono duplicado
-        Cliente existeTelefono = service.buscarPorTelefono(telefono);
-        if (existeTelefono != null) {
-            flash.addFlashAttribute("error", "El Teléfono '" + telefono + "' ya está registrado.");
-            return "redirect:/clientes";
-        }
-
-        // Crear y guardar
-        PersonaJuridica persona = new PersonaJuridica();
-        persona.setRuc(ruc);
-        persona.setRazonSocial(razonSocial);  // ✅ CORRECTO: razon_social
-        persona.setRepreLegal(repreLegal);    // ✅ CORRECTO: repre_legal
-        persona.setTelefono(telefono);
-        persona.setEmail(email);
-        persona.setDireccion(direccion);
+        if (validarComunes(persona, flash)) return "redirect:/clientes";
 
         service.guardarPersonaJuridica(persona);
-        flash.addFlashAttribute("success", "Persona Jurídica registrada exitosamente.");
+        flash.addFlashAttribute("success", "Empresa guardada correctamente.");
         return "redirect:/clientes";
     }
 
+    private boolean validarComunes(Cliente cliente, RedirectAttributes flash) {
+        Cliente existeEmail = service.buscarPorEmail(cliente.getEmail());
+        if (existeEmail != null && !existeEmail.getId_cliente().equals(cliente.getId_cliente())) {
+            flash.addFlashAttribute("error", "El Email ya está registrado.");
+            return true;
+        }
+        Cliente existeTelefono = service.buscarPorTelefono(cliente.getTelefono());
+        if (existeTelefono != null && !existeTelefono.getId_cliente().equals(cliente.getId_cliente())) {
+            flash.addFlashAttribute("error", "El Teléfono ya está registrado.");
+            return true;
+        }
+        return false;
+    }
+
+    // ==================== CAMBIAR ESTADO ====================
     @GetMapping("/cambiarEstado/{id}/{estado}/{tipo}")
     public String cambiarEstado(
             @PathVariable("id") Integer id, 
@@ -132,23 +137,22 @@ public class ClienteController {
             RedirectAttributes flash) {
         
         if (tipo.equals("natural")) {
-            PersonaNatural persona = service.buscarPersonaNaturalPorId(id);
-            if (persona != null) {
-                persona.setEstado(nuevoEstado);
-                service.guardarPersonaNatural(persona);
-                String mensaje = nuevoEstado ? "Cliente activado." : "Cliente desactivado.";
-                flash.addFlashAttribute("info", mensaje);
+            PersonaNatural p = service.buscarPersonaNaturalPorId(id);
+            if (p != null) {
+                p.setEstado(nuevoEstado);
+                service.guardarPersonaNatural(p);
             }
         } else {
-            PersonaJuridica persona = service.buscarPersonaJuridicaPorId(id);
-            if (persona != null) {
-                persona.setEstado(nuevoEstado);
-                service.guardarPersonaJuridica(persona);
-                String mensaje = nuevoEstado ? "Cliente activado." : "Cliente desactivado.";
-                flash.addFlashAttribute("info", mensaje);
+            PersonaJuridica p = service.buscarPersonaJuridicaPorId(id);
+            if (p != null) {
+                p.setEstado(nuevoEstado);
+                service.guardarPersonaJuridica(p);
             }
         }
         
+        String accion = nuevoEstado ? "activado" : "desactivado";
+     
+        flash.addFlashAttribute("success", "Cliente " + accion + " correctamente.");
         return "redirect:/clientes";
     }
 }

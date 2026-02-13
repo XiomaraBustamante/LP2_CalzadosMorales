@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -8,27 +8,38 @@
     <link rel="stylesheet" href="/assets/vendors/mdi/css/materialdesignicons.min.css">
     <link rel="stylesheet" href="/assets/vendors/css/vendor.bundle.base.css">
     <link rel="stylesheet" href="/assets/css/style.css">
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     
     <style>
-        /* Paginación Morada */
-        .page-item.active .page-link { background-color: #9a55ff !important; border-color: #9a55ff !important; color: white !important; }
-        .page-link { color: #9a55ff !important; }
-        
-        /* DataTable Bonito */
-        .dataTables_length label { display: flex !important; align-items: center !important; margin-bottom: 1rem; }
-        .dataTables_length select { background-color: #fff !important; border: 1px solid #ebedf2 !important; padding: 5px 25px 5px 10px !important; border-radius: 4px !important; margin: 0 10px !important; min-width: 70px; }
-        .dataTables_filter input { border: 1px solid #ebedf2 !important; padding: 5px 10px !important; border-radius: 4px !important; margin-left: 0.5rem; }
-        .dataTables_filter input:focus { border-color: #9a55ff !important; outline: none !important; }
-        
-        /* BOTONES CENTRADOS PERFECTOS */
-        .btn-icon-center {
-            display: inline-flex !important;
+        /* 1. ARREGLO VISUAL DEL SELECTOR "MOSTRAR" */
+        .dataTables_wrapper .dataTables_length label {
+            display: flex !important;
             align-items: center !important;
-            justify-content: center !important;
-            width: 35px; height: 35px; padding: 0;
+            gap: 10px;
+            font-size: 0.9rem;
         }
+        .dataTables_wrapper .dataTables_length select {
+            width: 80px !important;
+            padding: 5px 10px !important;
+            text-align: center !important;
+            border-radius: 4px !important;
+            border: 1px solid #ebedf2 !important;
+            height: 35px !important;
+            background-color: #fff !important;
+            margin: 0 !important;
+        }
+
+        /* 2. OTROS ESTILOS */
+        .page-item.active .page-link { background-color: #9a55ff; border-color: #9a55ff; color: white; }
+        .page-link { color: #9a55ff; }
+        
+        /* Ajuste para el mensaje de error de Bootstrap */
+        .invalid-feedback { font-size: 0.85em; font-weight: 500; }
+        
+        .btn-icon-sm { width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+        .nav-tabs .nav-link.active { border-top: 3px solid #9a55ff; color: #9a55ff; font-weight: bold; }
+        .nav-tabs .nav-link { color: #555; }
     </style>
 </head>
 <body>
@@ -40,93 +51,137 @@
 
             <div class="main-panel">
                 <div class="content-wrapper">
-                    
                     <div class="page-header">
                         <h3 class="page-title">
                             <span class="page-title-icon bg-gradient-primary text-white me-2">
-                                <i class="mdi mdi-account-multiple"></i>
+                                <i class="mdi mdi-account-group"></i>
                             </span> Gestión de Clientes
                         </h3>
-                        <button type="button" class="btn btn-gradient-primary btn-fw" onclick="abrirModalNuevo()">
-                            <i class="mdi mdi-plus"></i> Nuevo Cliente
-                        </button>
                     </div>
 
-                    <!-- TABLA ÚNICA DE TODOS LOS CLIENTES -->
-                    <div class="row">
-                        <div class="col-lg-12 grid-margin stretch-card">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h4 class="card-title">Listado General de Clientes</h4>
+                    <div class="card">
+                        <div class="card-body">
+                            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="natural-tab" data-bs-toggle="tab" data-bs-target="#natural" type="button">Personas Naturales</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="juridica-tab" data-bs-toggle="tab" data-bs-target="#juridica" type="button">Personas Jurídicas</button>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content pt-4" id="myTabContent">
+                                <div class="tab-pane fade show active" id="natural" role="tabpanel">
+                                    <button class="btn btn-gradient-primary mb-3" onclick="abrirModalNaturalNuevo()">
+                                        <i class="mdi mdi-plus"></i> Nueva Persona Natural
+                                    </button>
                                     <div class="table-responsive">
-                                        <table id="tablaClientes" class="table table-hover table-striped">
-                                            <thead>
+                                        <table class="table table-hover table-bordered" id="tablaNatural" style="width:100%">
+                                            <thead class="table-light">
                                                 <tr>
-													<th>ID</th>
-                                                    <th>DNI/RUC</th>
-                                                    <th>Tipo</th>
-                                                    <th>Nombre / Razón Social</th>
+                                                    <th>ID</th>
+                                                    <th>DNI</th>
+                                                    <th>Nombre</th>
                                                     <th>Teléfono</th>
-                                                    <th>Email</th>
                                                     <th>Estado</th>
                                                     <th>Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <!-- PERSONAS NATURALES -->
                                                 <tr th:each="p : ${personasNaturales}">
-													<td th:text="${p.id_cliente}"></td>
+                                                    <td th:text="${p.id_cliente}"></td>
                                                     <td th:text="${p.dni}"></td>
-                                                    <td><span class="badge badge-info">Natural</span></td>
                                                     <td th:text="${p.nombre + ' ' + p.apellido}"></td>
                                                     <td th:text="${p.telefono}"></td>
-                                                    <td th:text="${p.email}"></td>
                                                     <td>
-                                                        <label class="badge badge-success" th:if="${p.estado}">Activo</label>
-                                                        <label class="badge badge-danger" th:unless="${p.estado}">Inactivo</label>
+                                                        <span th:if="${p.estado}" class="badge badge-success">Activo</span>
+                                                        <span th:unless="${p.estado}" class="badge badge-danger">Inactivo</span>
                                                     </td>
                                                     <td>
-                                                        <div th:if="${p.estado}" class="d-inline-flex gap-1">
-                                                            <a th:href="@{/clientes/cambiarEstado/} + ${p.id_cliente} + '/false/natural'" 
-                                                               class="btn btn-sm btn-inverse-danger btn-icon-center" 
-                                                               title="Desactivar">
-                                                                <i class="mdi mdi-delete"></i>
+                                                        <div th:if="${p.estado}">
+                                                            <button class="btn btn-info btn-icon-sm" title="Editar"
+                                                                    th:data-id="${p.id_cliente}"
+                                                                    th:data-dni="${p.dni}"
+                                                                    th:data-nombre="${p.nombre}"
+                                                                    th:data-apellido="${p.apellido}"
+                                                                    th:data-genero="${p.genero}"
+                                                                    th:data-telefono="${p.telefono}"
+                                                                    th:data-email="${p.email}"
+                                                                    th:data-direccion="${p.direccion}"
+                                                                    onclick="editarNatural(this)">
+                                                                <i class="mdi mdi-pencil"></i>
+                                                            </button>
+                                                            
+                                                            <a th:href="@{/clientes/cambiarEstado/{id}/false/natural(id=${p.id_cliente})}" 
+                                                               class="btn btn-danger btn-icon-sm" title="Desactivar"
+                                                               onclick="confirmarCambioEstado(event, this)">
+                                                                <i class="mdi mdi-close"></i>
                                                             </a>
                                                         </div>
                                                         <div th:unless="${p.estado}">
-                                                            <a th:href="@{/clientes/cambiarEstado/} + ${p.id_cliente} + '/true/natural'" 
-                                                               class="btn btn-sm btn-inverse-success btn-icon-center" 
-                                                               title="Activar">
+                                                            <a th:href="@{/clientes/cambiarEstado/{id}/true/natural(id=${p.id_cliente})}" 
+                                                               class="btn btn-success btn-icon-sm" title="Activar"
+                                                               onclick="confirmarCambioEstado(event, this)">
                                                                 <i class="mdi mdi-check"></i>
                                                             </a>
                                                         </div>
                                                     </td>
                                                 </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
 
-                                                <!-- PERSONAS JURÍDICAS -->
-                                                <tr th:each="e : ${personasJuridicas}">
-													<td th:text="${e.id_cliente}"></td>
-                                                    <td th:text="${e.ruc}"></td>
-                                                    <td><span class="badge badge-warning">Jurídica</span></td>
-                                                    <td th:text="${e.razonSocial}"></td>
-                                                    <td th:text="${e.telefono}"></td>
-                                                    <td th:text="${e.email}"></td>
+                                <div class="tab-pane fade" id="juridica" role="tabpanel">
+                                    <button class="btn btn-gradient-primary mb-3" onclick="abrirModalJuridicaNuevo()">
+                                        <i class="mdi mdi-plus"></i> Nueva Empresa
+                                    </button>
+                                    <div class="table-responsive">
+                                        <table class="table table-hover table-bordered" id="tablaJuridica" style="width:100%">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>RUC</th>
+                                                    <th>Razón Social</th>
+                                                    <th>Teléfono</th>
+                                                    <th>Estado</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="j : ${personasJuridicas}">
+                                                    <td th:text="${j.id_cliente}"></td>
+                                                    <td th:text="${j.ruc}"></td>
+                                                    <td th:text="${j.razonSocial}"></td>
+                                                    <td th:text="${j.telefono}"></td>
                                                     <td>
-                                                        <label class="badge badge-success" th:if="${e.estado}">Activo</label>
-                                                        <label class="badge badge-danger" th:unless="${e.estado}">Inactivo</label>
+                                                        <span th:if="${j.estado}" class="badge badge-success">Activo</span>
+                                                        <span th:unless="${j.estado}" class="badge badge-danger">Inactivo</span>
                                                     </td>
                                                     <td>
-                                                        <div th:if="${e.estado}" class="d-inline-flex gap-1">
-                                                            <a th:href="@{/clientes/cambiarEstado/} + ${e.id_cliente} + '/false/juridica'" 
-                                                               class="btn btn-sm btn-inverse-danger btn-icon-center" 
-                                                               title="Desactivar">
-                                                                <i class="mdi mdi-delete"></i>
+                                                        <div th:if="${j.estado}">
+                                                            <button class="btn btn-info btn-icon-sm" title="Editar"
+                                                                    th:data-id="${j.id_cliente}"
+                                                                    th:data-ruc="${j.ruc}"
+                                                                    th:data-razonsocial="${j.razonSocial}"
+                                                                    th:data-reprelegal="${j.repreLegal}"
+                                                                    th:data-telefono="${j.telefono}"
+                                                                    th:data-email="${j.email}"
+                                                                    th:data-direccion="${j.direccion}"
+                                                                    onclick="editarJuridica(this)">
+                                                                <i class="mdi mdi-pencil"></i>
+                                                            </button>
+                                                            
+                                                            <a th:href="@{/clientes/cambiarEstado/{id}/false/juridica(id=${j.id_cliente})}" 
+                                                               class="btn btn-danger btn-icon-sm" title="Desactivar"
+                                                               onclick="confirmarCambioEstado(event, this)">
+                                                                <i class="mdi mdi-close"></i>
                                                             </a>
                                                         </div>
-                                                        <div th:unless="${e.estado}">
-                                                            <a th:href="@{/clientes/cambiarEstado/} + ${e.id_cliente} + '/true/juridica'" 
-                                                               class="btn btn-sm btn-inverse-success btn-icon-center" 
-                                                               title="Activar">
+                                                        <div th:unless="${j.estado}">
+                                                            <a th:href="@{/clientes/cambiarEstado/{id}/true/juridica(id=${j.id_cliente})}" 
+                                                               class="btn btn-success btn-icon-sm" title="Activar"
+                                                               onclick="confirmarCambioEstado(event, this)">
                                                                 <i class="mdi mdi-check"></i>
                                                             </a>
                                                         </div>
@@ -139,233 +194,342 @@
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- MODAL -->
-                <div class="modal fade" id="modalCliente" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="modalTitle">Nuevo Cliente</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            
-                            <form id="formCliente" method="post" class="needs-validation" novalidate>
-                                <div class="modal-body">
-                                    
-                                    <!-- TIPO DE CLIENTE -->
-                                    <div class="form-group mb-3">
-                                        <label>Tipo de Cliente</label>
-                                        <select class="form-control" id="selectTipo" name="tipoCliente">
-                                            <option value="natural">Persona Natural</option>
-                                            <option value="juridica">Persona Jurídica</option>
-                                        </select>
-                                    </div>
-
-                                    <!-- BLOQUE PERSONA NATURAL -->
-                                    <div id="bloqueNatural">
-                                        <div class="form-group mb-3">
-                                            <label>DNI</label>
-                                            <input type="text" name="dni" id="dni" placeholder="8 dígitos" 
-                                                   maxlength="8" class="form-control" required>
-                                            <div class="invalid-feedback">Ingrese un DNI válido.</div>
-                                        </div>
-                                        <div class="form-group mb-3">
-                                            <label>Nombre</label>
-                                            <input type="text" name="nombre" id="nombre" placeholder="Nombre" 
-                                                   class="form-control" required>
-                                            <div class="invalid-feedback">Ingrese el nombre.</div>
-                                        </div>
-                                        <div class="form-group mb-3">
-                                            <label>Apellido</label>
-                                            <input type="text" name="apellido" id="apellido" placeholder="Apellido" 
-                                                   class="form-control" required>
-                                            <div class="invalid-feedback">Ingrese el apellido.</div>
-                                        </div>
-                                        <div class="form-group mb-3">
-                                            <label>Género</label>
-                                            <select name="genero" id="genero" class="form-control" required>
-                                                <option value="1">Masculino</option>
-                                                <option value="0">Femenino</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <!-- BLOQUE PERSONA JURÍDICA -->
-                                    <div id="bloqueJuridica" style="display:none;">
-                                        <div class="form-group mb-3">
-                                            <label>RUC</label>
-                                            <input type="text" name="ruc" id="ruc" placeholder="11 dígitos" 
-                                                   maxlength="11" class="form-control">
-                                            <div class="invalid-feedback">Ingrese un RUC válido.</div>
-                                        </div>
-                                        <div class="form-group mb-3">
-                                            <label>Razón Social</label>
-                                            <input type="text" name="razonSocial" id="razonSocial" 
-                                                   placeholder="Nombre de la empresa" class="form-control">
-                                            <div class="invalid-feedback">Ingrese la razón social.</div>
-                                        </div>
-                                        <div class="form-group mb-3">
-                                            <label>Representante Legal</label>
-                                            <input type="text" name="repreLegal" id="repreLegal" 
-                                                   placeholder="Nombre del representante" class="form-control">
-                                            <div class="invalid-feedback">Ingrese el representante.</div>
-                                        </div>
-                                    </div>
-
-                                    <!-- CAMPOS COMUNES -->
-                                    <div class="form-group mb-3">
-                                        <label>Teléfono</label>
-                                        <input type="text" name="telefono" id="telefono" placeholder="9 dígitos" 
-                                               maxlength="9" class="form-control" required>
-                                        <div class="invalid-feedback">Ingrese un teléfono válido.</div>
-                                    </div>
-                                    <div class="form-group mb-3">
-                                        <label>Email</label>
-                                        <input type="email" name="email" id="email" placeholder="ejemplo@correo.com" 
-                                               class="form-control" required>
-                                        <div class="invalid-feedback">Ingrese un email válido.</div>
-                                    </div>
-                                    <div class="form-group mb-3">
-                                        <label>Dirección</label>
-                                        <input type="text" name="direccion" id="direccion" placeholder="Dirección completa" 
-                                               class="form-control" required>
-                                        <div class="invalid-feedback">Ingrese la dirección.</div>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                    <button type="submit" class="btn btn-primary">Guardar Cliente</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-
+                </div> 
                 <footer class="footer">
                     <div class="d-sm-flex justify-content-center justify-content-sm-between">
-                        <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2026 Calzados Morales</span>
+                        <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright © 2026 Calzados Morales</span>
                     </div>
                 </footer>
             </div>
         </div>
     </div>
 
-    <!-- ✅ SCRIPTS EN EL ORDEN CORRECTO -->
+    <div class="modal fade" id="modalNatural" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="tituloModalNatural">Registrar Persona Natural</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form th:action="@{/clientes/guardarNatural}" th:object="${personaNatural}" method="post">
+                        <input type="hidden" th:field="*{id_cliente}" name="id_cliente" />
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label>DNI</label>
+                                <input type="text" th:field="*{dni}" name="dni" class="form-control" 
+                                       th:classappend="${#fields.hasErrors('dni')} ? 'is-invalid' : ''"
+                                       maxlength="8" onkeyup="validarCampo(this)">
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('dni')}" th:errors="*{dni}"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label>Género</label>
+                                <select th:field="*{genero}" name="genero" class="form-control"
+                                        th:classappend="${#fields.hasErrors('genero')} ? 'is-invalid' : ''"
+                                        onchange="validarCampo(this)">
+                                    <option value="">Seleccione</option>
+                                    <option value="1">Masculino</option>
+                                    <option value="2">Femenino</option>
+                                </select>
+                                <div class="invalid-feedback" th:if="${#fields.hasErrors('genero')}" th:errors="*{genero}"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label>Nombres</label>
+                            <input type="text" th:field="*{nombre}" name="nombre" class="form-control"
+                                   th:classappend="${#fields.hasErrors('nombre')} ? 'is-invalid' : ''"
+                                   onkeyup="validarCampo(this)">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label>Apellidos</label>
+                            <input type="text" th:field="*{apellido}" name="apellido" class="form-control"
+                                   th:classappend="${#fields.hasErrors('apellido')} ? 'is-invalid' : ''"
+                                   onkeyup="validarCampo(this)">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('apellido')}" th:errors="*{apellido}"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label>Teléfono</label>
+                            <input type="text" th:field="*{telefono}" name="telefono" class="form-control"
+                                   th:classappend="${#fields.hasErrors('telefono')} ? 'is-invalid' : ''"
+                                   maxlength="9" onkeyup="validarCampo(this)">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label>Email</label>
+                            <input type="email" th:field="*{email}" name="email" class="form-control"
+                                   th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+                                   onkeyup="validarCampo(this)">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label>Dirección</label>
+                            <input type="text" th:field="*{direccion}" name="direccion" class="form-control"
+                                   th:classappend="${#fields.hasErrors('direccion')} ? 'is-invalid' : ''"
+                                   onkeyup="validarCampo(this)">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalJuridica" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title" id="tituloModalJuridica">Registrar Empresa</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form th:action="@{/clientes/guardarJuridica}" th:object="${personaJuridica}" method="post">
+                        <input type="hidden" th:field="*{id_cliente}" name="id_cliente" />
+                        
+                        <div class="mb-3">
+                            <label>RUC</label>
+                            <input type="text" th:field="*{ruc}" name="ruc" class="form-control"
+                                   th:classappend="${#fields.hasErrors('ruc')} ? 'is-invalid' : ''"
+                                   maxlength="11" onkeyup="validarCampo(this)">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('ruc')}" th:errors="*{ruc}"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label>Razón Social</label>
+                            <input type="text" th:field="*{razonSocial}" name="razonSocial" class="form-control"
+                                   th:classappend="${#fields.hasErrors('razonSocial')} ? 'is-invalid' : ''"
+                                   onkeyup="validarCampo(this)">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('razonSocial')}" th:errors="*{razonSocial}"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label>Representante Legal</label>
+                            <input type="text" th:field="*{repreLegal}" name="repreLegal" class="form-control"
+                                   th:classappend="${#fields.hasErrors('repreLegal')} ? 'is-invalid' : ''"
+                                   onkeyup="validarCampo(this)">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('repreLegal')}" th:errors="*{repreLegal}"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label>Teléfono</label>
+                            <input type="text" th:field="*{telefono}" name="telefono" class="form-control"
+                                   th:classappend="${#fields.hasErrors('telefono')} ? 'is-invalid' : ''"
+                                   maxlength="9" onkeyup="validarCampo(this)">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('telefono')}" th:errors="*{telefono}"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label>Email</label>
+                            <input type="email" th:field="*{email}" name="email" class="form-control"
+                                   th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"
+                                   onkeyup="validarCampo(this)">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label>Dirección</label>
+                            <input type="text" th:field="*{direccion}" name="direccion" class="form-control"
+                                   th:classappend="${#fields.hasErrors('direccion')} ? 'is-invalid' : ''"
+                                   onkeyup="validarCampo(this)">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-info">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/assets/vendors/js/vendor.bundle.base.js"></script>
     <script src="/assets/js/off-canvas.js"></script>
     <script src="/assets/js/misc.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script>
-        var myModal;
-
+    <script th:inline="javascript">
         $(document).ready(function() {
-            // INICIALIZAR MODAL
-            var modalElement = document.getElementById('modalCliente');
-            if (modalElement) {
-                myModal = new bootstrap.Modal(modalElement);
+            // Inicializar DataTables
+            $('#tablaNatural').DataTable({ "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" } });
+            $('#tablaJuridica').DataTable({ "language": { "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" } });
+
+            // LOGICA PARA REABRIR MODAL SI HAY ERROR DE VALIDACIÓN
+            /*<![CDATA[*/
+            var abrirNatural = /*[[${modalOpenNatural}]]*/ false;
+            var abrirJuridica = /*[[${modalOpenJuridica}]]*/ false;
+            
+            if (abrirNatural) {
+                new bootstrap.Modal(document.getElementById('modalNatural')).show();
             }
-
-            // INICIALIZAR DATATABLE
-            $('#tablaClientes').DataTable({
-                "language": {
-                    "lengthMenu": "Mostrar _MENU_ registros",
-                    "zeroRecords": "No se encontraron coincidencias",
-                    "info": "Mostrando del _START_ al _END_ de _TOTAL_ registros",
-                    "infoEmpty": "Sin registros disponibles",
-                    "infoFiltered": "(filtrado de _MAX_ registros totales)",
-                    "search": "Buscar:",
-                    "paginate": {
-                        "first": "Primero",
-                        "last": "Último",
-                        "next": "Siguiente",
-                        "previous": "Anterior"
-                    }
-                },
-                "pageLength": 10
-            });
-
-            // ALTERNAR CAMPOS SEGÚN TIPO
-            $('#selectTipo').change(function() {
-                if($(this).val() === 'natural') {
-                    $('#bloqueNatural').show();
-                    $('#bloqueJuridica').hide();
-                    $('#ruc, #razonSocial, #repreLegal').val('').removeAttr('required');
-                    $('#dni, #nombre, #apellido, #genero').attr('required', 'required');
-                } else {
-                    $('#bloqueNatural').hide();
-                    $('#bloqueJuridica').show();
-                    $('#dni, #nombre, #apellido').val('').removeAttr('required');
-                    $('#genero').removeAttr('required');
-                    $('#ruc, #razonSocial, #repreLegal').attr('required', 'required');
-                }
-            });
-
-            // VALIDAR SOLO NÚMEROS
-            $('#dni, #ruc, #telefono').on('input', function() {
-                this.value = this.value.replace(/[^0-9]/g, '');
-            });
-
-            // VALIDAR SOLO LETRAS
-            $('#nombre, #apellido, #repreLegal').on('input', function() {
-                this.value = this.value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '');
-            });
-
-            // ENVIAR AL ENDPOINT CORRECTO
-            $('#formCliente').submit(function(e) {
-                e.preventDefault();
-                var tipo = $('#selectTipo').val();
-                var action = tipo === 'natural' ? '/clientes/guardarNatural' : '/clientes/guardarJuridica';
-                $(this).attr('action', action);
-                this.submit();
-            });
-
-            // VALIDACIÓN BOOTSTRAP
-            (function () {
-              'use strict'
-              var forms = document.querySelectorAll('.needs-validation')
-              Array.prototype.slice.call(forms).forEach(function (form) {
-                form.addEventListener('submit', function (event) {
-                  if (!form.checkValidity()) {
-                    event.preventDefault(); event.stopPropagation();
-                  }
-                  form.classList.add('was-validated');
-                }, false)
-              })
-            })()
+            if (abrirJuridica) {
+                var jurModal = new bootstrap.Modal(document.getElementById('modalJuridica'));
+                jurModal.show();
+                var triggerEl = document.querySelector('#juridica-tab');
+                var tab = new bootstrap.Tab(triggerEl);
+                tab.show();
+            }
+            /*]]>*/
         });
 
-        function abrirModalNuevo() {
-            limpiarModal();
-            if(myModal) myModal.show();
+        // ================= FUNCIÓN NUEVO (LIMPIA EL FORM) =================
+        function abrirModalNaturalNuevo() {
+            var modalEl = document.getElementById('modalNatural');
+            var form = modalEl.querySelector('form');
+            form.reset(); // Limpia cajas
+            modalEl.querySelector('input[name="id_cliente"]').value = ''; 
+            
+            // QUITA CLASES VERDES/ROJAS
+            $(form).find('input, select').removeClass('is-valid is-invalid');
+            $(form).find('.invalid-feedback').hide();
+            
+            document.getElementById('tituloModalNatural').innerText = "Registrar Persona Natural";
+            var modal = new bootstrap.Modal(modalEl);
+            modal.show();
         }
 
-        function limpiarModal() {
-            $('#formCliente')[0].reset();
-            $('#selectTipo').val('natural').trigger('change');
-            $('#bloqueNatural').show();
-            $('#bloqueJuridica').hide();
-            document.getElementById('modalTitle').innerText = "Nuevo Cliente";
+        function abrirModalJuridicaNuevo() {
+            var modalEl = document.getElementById('modalJuridica');
+            var form = modalEl.querySelector('form');
+            form.reset();
+            modalEl.querySelector('input[name="id_cliente"]').value = ''; 
+
+            // QUITA CLASES VERDES/ROJAS
+            $(form).find('input, select').removeClass('is-valid is-invalid');
+            $(form).find('.invalid-feedback').hide();
+
+            document.getElementById('tituloModalJuridica').innerText = "Registrar Empresa";
+            var modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        }
+
+        // ================= FUNCIÓN EDITAR (CARGA DATOS) =================
+        function editarNatural(btn) {
+            var modalEl = document.getElementById('modalNatural');
+            var $modal = $(modalEl);
+            var form = modalEl.querySelector('form');
+
+            // Limpia colores previos
+            $(form).find('input, select').removeClass('is-valid is-invalid');
+            $(form).find('.invalid-feedback').hide();
             
-            // Limpiar validación
-            var form = document.querySelector('.needs-validation');
-            if (form) form.classList.remove('was-validated');
+            $modal.find('input[name="id_cliente"]').val($(btn).data('id'));
+            $modal.find('input[name="dni"]').val($(btn).data('dni'));
+            $modal.find('input[name="nombre"]').val($(btn).data('nombre'));
+            $modal.find('input[name="apellido"]').val($(btn).data('apellido'));
+            $modal.find('select[name="genero"]').val($(btn).data('genero'));
+            $modal.find('input[name="telefono"]').val($(btn).data('telefono'));
+            $modal.find('input[name="email"]').val($(btn).data('email'));
+            $modal.find('input[name="direccion"]').val($(btn).data('direccion'));
+            
+            document.getElementById('tituloModalNatural').innerText = "Editar Persona Natural";
+            var modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        }
+
+        function editarJuridica(btn) {
+            var modalEl = document.getElementById('modalJuridica');
+            var $modal = $(modalEl);
+            var form = modalEl.querySelector('form');
+
+            // Limpia colores previos
+            $(form).find('input, select').removeClass('is-valid is-invalid');
+            $(form).find('.invalid-feedback').hide();
+            
+            $modal.find('input[name="id_cliente"]').val($(btn).data('id'));
+            $modal.find('input[name="ruc"]').val($(btn).data('ruc'));
+            $modal.find('input[name="razonSocial"]').val($(btn).data('razonsocial'));
+            $modal.find('input[name="repreLegal"]').val($(btn).data('reprelegal'));
+            $modal.find('input[name="telefono"]').val($(btn).data('telefono'));
+            $modal.find('input[name="email"]').val($(btn).data('email'));
+            $modal.find('input[name="direccion"]').val($(btn).data('direccion'));
+            
+            document.getElementById('tituloModalJuridica').innerText = "Editar Empresa";
+            var modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        }
+
+        // ================= VALIDACIÓN VISUAL EN TIEMPO REAL =================
+        function validarCampo(input) {
+            var valor = input.value.trim();
+            var name = input.getAttribute('name'); 
+            var esValido = false;
+
+            if (name === 'dni') {
+                esValido = valor.length === 8 && /^\d+$/.test(valor);
+            } else if (name === 'ruc') {
+                esValido = valor.length === 11 && /^\d+$/.test(valor);
+            } else if (name === 'telefono') {
+                esValido = valor.length === 9 && /^\d+$/.test(valor);
+            } else if (name === 'email') {
+                esValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor);
+            } else if (name === 'genero') {
+                esValido = valor !== "";
+            } else {
+                // Para textos generales (nombre, dirección, etc.)
+                esValido = valor.length >= 2;
+            }
+
+            if (esValido) {
+                input.classList.remove('is-invalid');
+                input.classList.add('is-valid');
+                // Ocultar mensaje de error
+                var errorDiv = input.nextElementSibling;
+                if (errorDiv && errorDiv.classList.contains('invalid-feedback')) {
+                    errorDiv.style.display = 'none';
+                }
+            } else {
+                input.classList.remove('is-valid');
+                // No forzamos 'is-invalid' mientras escribe para no ser molestos, 
+                // pero si estaba invalido lo dejamos invalido hasta que lo arregle.
+                // Opcional: input.classList.add('is-invalid'); 
+            }
+        }
+
+        // ================= CONFIRMACIÓN SWEETALERT MEJORADA =================
+        function confirmarCambioEstado(event, elemento) {
+            event.preventDefault(); 
+            
+            const url = elemento.getAttribute('href');
+            const tituloBtn = elemento.getAttribute('title'); // "Activar" o "Desactivar"
+
+            let verbo;
+            let colorBtn;
+            
+            if (tituloBtn === 'Activar') {
+                verbo = 'activado';
+                colorBtn = '#198754'; // Verde
+            } else {
+                verbo = 'desactivado';
+                colorBtn = '#dc3545'; // Rojo
+            }
+
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "El cliente será " + verbo + " inmediatamente.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: colorBtn,
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, ' + tituloBtn.toLowerCase(),
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = url; 
+                }
+            });
         }
     </script>
     
     <script th:if="${success != null}">
-        Swal.fire({ icon: 'success', title: '¡Éxito!', text: "[(${success})]", confirmButtonColor: '#9a55ff' });
+        Swal.fire({ icon: 'success', title: '¡Éxito!', text: '[[${success}]]', confirmButtonColor: '#9a55ff' });
     </script>
     <script th:if="${error != null}">
-        Swal.fire({ icon: 'error', title: 'Error', text: "[(${error})]", confirmButtonColor: '#d33' });
-    </script>
-    <script th:if="${info != null}">
-        Swal.fire({ icon: 'info', title: 'Información', text: "[(${info})]", confirmButtonColor: '#9a55ff' });
+        Swal.fire({ icon: 'error', title: 'Atención', text: '[[${error}]]', confirmButtonColor: '#dc3545' });
     </script>
 </body>
 </html>

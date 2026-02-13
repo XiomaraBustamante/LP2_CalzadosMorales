@@ -36,15 +36,12 @@ public class Venta {
 	@JoinColumn(name = "id_usuario", nullable = false)
 	private Usuario usuario;
 
-	// --- ZONA DAYBIS (Cliente) ---
-	// Como la tabla en BD pide id_cliente NOT NULL, cuando Daybis te pase
-	// la entidad Cliente, DESCOMENTAS ESTO DE ABAJO:
-	/*
-	 * @ManyToOne
-	 * 
-	 * @JoinColumn(name = "id_cliente", nullable = false) private Cliente cliente;
-	 */
 
+    
+    @ManyToOne
+    @JoinColumn(name = "id_cliente", nullable = false)
+    private Cliente cliente;
+	
 	@OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<DetalleVenta> detalles = new ArrayList<>();
 
