@@ -72,4 +72,8 @@ public class ClienteService {
     public Cliente buscarPorTelefono(String telefono) {
         return clienteRepository.findByTelefono(telefono);
     }
+    
+    public List<Cliente> listarTodos() {
+        return clienteRepository.findAll(); 
+    }
 }

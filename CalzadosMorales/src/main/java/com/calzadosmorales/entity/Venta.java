@@ -122,10 +122,13 @@ public class Venta {
 		this.usuario = usuario;
 	}
 
-	/*
-	 * public Cliente getCliente() { return cliente; } public void
-	 * setCliente(Cliente cliente) { this.cliente = cliente; }
-	 */
+	public Cliente getCliente() {
+	    return cliente;
+	}
+
+	public void setCliente(Cliente cliente) {
+	    this.cliente = cliente;
+	}
 
 	public List<DetalleVenta> getDetalles() {
 		return detalles;
