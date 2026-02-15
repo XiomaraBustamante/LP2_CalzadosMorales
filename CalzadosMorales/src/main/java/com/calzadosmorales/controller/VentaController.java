@@ -182,14 +182,14 @@ public class VentaController {
         }
     }
     
-    // 5. VER PDF
+ // 5. VER PDF
     @GetMapping("/verPDF/{id}")
     public void verPDF(@PathVariable("id") Integer idVenta, HttpServletResponse response) throws IOException {
         Venta venta = ventaService.buscarPorId(idVenta); 
         if (venta != null) {
-            response.setContentType("application/pdf");
-            response.setHeader("Content-Disposition", "inline; filename=comprobante_" + idVenta + ".pdf");
-            //pdfService.exportarVentaPDF(response, venta);
+            // ¡QUITAMOS EL // DE AQUÍ ABAJO!
+            pdfService.exportarVentaPDF(response, venta);
         }
     }
+  
 }
