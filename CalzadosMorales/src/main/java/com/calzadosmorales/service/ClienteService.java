@@ -76,4 +76,10 @@ public class ClienteService {
     public List<Cliente> listarTodos() {
         return clienteRepository.findAll(); 
     }
+    
+
+    public Cliente buscarPorId(Integer id) {
+  
+        return clienteRepository.findById(id).orElse(null);
+    }
 }

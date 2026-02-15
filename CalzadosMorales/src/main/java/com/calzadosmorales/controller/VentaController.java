@@ -138,18 +138,18 @@ public class VentaController {
             venta.setFecha(LocalDateTime.now());
             
             // BUSCAMOS EL CLIENTE REAL PARA VALIDAR EL TIPO
-            //AYUDAAAAAAA
-            //Cliente clienteReal = clienteService.buscarPorId(idCliente);
-            //venta.setCliente(clienteReal);
+            
+            Cliente clienteReal = clienteService.buscarPorId(idCliente);
+            venta.setCliente(clienteReal);
 
             // --- LÓGICA DE BOLETA VS FACTURA ---
-            //if (clienteReal instanceof PersonaJuridica) {
+            if (clienteReal instanceof PersonaJuridica) {
                 venta.setTipoComprobante("Factura");
                 venta.setSerie("F001");
-            //} else {
+            } else {
                 venta.setTipoComprobante("Boleta");
                 venta.setSerie("B001");
-            //}
+            }
 
             // Usuario Hardcoded (Vendedor con ID 1)
             Usuario vendedor = new Usuario();
@@ -189,7 +189,7 @@ public class VentaController {
         if (venta != null) {
             response.setContentType("application/pdf");
             response.setHeader("Content-Disposition", "inline; filename=comprobante_" + idVenta + ".pdf");
-            pdfService.exportarVentaPDF(response, venta);
+            //pdfService.exportarVentaPDF(response, venta);
         }
     }
 }
