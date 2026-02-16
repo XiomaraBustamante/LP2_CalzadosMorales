@@ -1,13 +1,15 @@
-<nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row" th:fragment="navbar">
+<nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row" th:fragment="navbar"
+     xmlns:th="http://www.thymeleaf.org"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-start">
-        <a class="navbar-brand brand-logo d-flex align-items-center" href="/" style="color: #9a55ff;">
+        <a class="navbar-brand brand-logo d-flex align-items-center" href="/index" style="color: #9a55ff;">
             <i class="mdi mdi-shoe-print" style="font-size: 2.2rem; margin-right: 10px;"></i>
             <div style="line-height: 1.1; text-align: left;">
                 <span style="display: block; font-size: 0.9rem; letter-spacing: 2px; color: #333;">CALZADOS</span>
                 <span style="display: block; font-size: 1.4rem; font-weight: 900; text-transform: uppercase;">MORALES</span>
             </div>
         </a>
-        <a class="navbar-brand brand-logo-mini" href="/">
+        <a class="navbar-brand brand-logo-mini" href="/index">
             <i class="mdi mdi-shoe-print" style="font-size: 2rem; color: #9a55ff;"></i>
         </a>
     </div>
@@ -22,12 +24,14 @@
                     </div>
                     <div class="nav-profile-text">
                         <p class="mb-1 text-black d-flex align-items-center">
-                            Xiomara B. <i class="mdi mdi-chevron-down ms-1" style="font-size: 1.2rem;"></i>
+                            <span th:text="${userNombreCompleto}">Usuario</span> 
+                            <i class="mdi mdi-chevron-down ms-1" style="font-size: 1.2rem;"></i>
                         </p>
                     </div>
                 </a>
                 <div class="dropdown-menu navbar-dropdown" aria-labelledby="profileDropdown">
-                    <a class="dropdown-item" href="/">
+                    <form th:action="@{/logout}" method="post" id="logoutForm" style="display: none;"></form>
+                    <a class="dropdown-item" href="javascript:document.getElementById('logoutForm').submit();">
                         <i class="mdi mdi-logout me-2 text-primary"></i> Cerrar Sesión
                     </a>
                 </div>
