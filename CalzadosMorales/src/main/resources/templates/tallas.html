@@ -54,7 +54,7 @@
                             <span class="page-title-icon bg-gradient-primary text-white me-2">
                                 <i class="mdi mdi-ruler"></i> </span> Gestión de Tallas
                         </h3>
-                        <button type="button" class="btn btn-gradient-primary btn-fw" onclick="limpiarModal()" data-bs-toggle="modal" data-bs-target="#modalTalla">
+                        <button th:if="${rolId == 1}" type="button" class="btn btn-gradient-primary btn-fw" onclick="limpiarModal()" data-bs-toggle="modal" data-bs-target="#modalTalla">
                             <i class="mdi mdi-plus"></i> Nueva Talla
                         </button>
                     </div>
@@ -72,7 +72,7 @@
                                                     <th>ID</th>
                                                     <th>Nombre / Número</th>
                                                     <th>Estado</th>
-                                                    <th>Acciones</th>
+                                                    <th th:if="${rolId == 1}">Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -85,7 +85,7 @@
                                                         <label class="badge badge-danger" th:unless="${tal.estado}">Inactivo</label>
                                                     </td>
                                                     
-                                                    <td>
+                                                    <td th:if="${rolId == 1}">
                                                         <div class="d-inline-flex align-items-center gap-2">
                                                             <div th:if="${tal.estado}">
                                                                 <button class="btn btn-sm btn-inverse-info btn-icon d-inline-flex align-items-center justify-content-center" 
@@ -164,125 +164,101 @@
         </div>
     </div>
 	<script src="/assets/vendors/js/vendor.bundle.base.js"></script>
-	    <script src="/assets/js/off-canvas.js"></script>
-	    <script src="/assets/js/misc.js"></script>
-	    
-	    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-	    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-	    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+    <script src="/assets/js/off-canvas.js"></script>
+    <script src="/assets/js/misc.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
-	    <script>
-	        $(document).ready(function() {
-	            // 1. INICIALIZAR DATATABLES
-	            $('#tablaTallas').DataTable({
-	                "language": {
-	                    "lengthMenu": "Mostrar _MENU_ registros",
-	                    "zeroRecords": "No se encontraron coincidencias",
-	                    "info": "Página _PAGE_ de _PAGES_",
-	                    "infoEmpty": "Sin registros",
-	                    "infoFiltered": "(filtrado de _MAX_)",
-	                    "search": "Buscar:",
-	                    "paginate": { "first": "Primero", "last": "Último", "next": "Siguiente", "previous": "Anterior" }
-	                },
-	                "pageLength": 10
-	            });
+    <script>
+        $(document).ready(function() {
+            $('#tablaTallas').DataTable({
+                "language": {
+                    "lengthMenu": "Mostrar _MENU_ registros",
+                    "zeroRecords": "No se encontraron coincidencias",
+                    "info": "Página _PAGE_ de _PAGES_",
+                    "infoEmpty": "Sin registros",
+                    "infoFiltered": "(filtrado de _MAX_)",
+                    "search": "Buscar:",
+                    "paginate": { "first": "Primero", "last": "Último", "next": "Siguiente", "previous": "Anterior" }
+                },
+                "pageLength": 10
+            });
 
-	            // 2. CONFIGURACIÓN DE LÍMITES
-	            const TALLA_MIN = 30; 
-	            const TALLA_MAX = 42; 
+            const TALLA_MIN = 30; 
+            const TALLA_MAX = 42; 
 
-	            // --- VALIDACIÓN EN TIEMPO REAL ---
-	            $('#nombre').on('input', function() {
-	                var input = $(this);
-	                var valorStr = input.val();
-	                
-	                // A. Limpieza: Solo números y punto
-	                var soloNumeros = valorStr.replace(/[^0-9.]/g, '');
-	                if (valorStr !== soloNumeros) {
-	                    input.val(soloNumeros);
-	                }
+            $('#nombre').on('input', function() {
+                var input = $(this);
+                var valorStr = input.val();
+                var soloNumeros = valorStr.replace(/[^0-9.]/g, '');
+                if (valorStr !== soloNumeros) { input.val(soloNumeros); }
 
-	                // B. Validación de Rango
-	                var valorNum = parseFloat(soloNumeros);
-	                var btnGuardar = $('#btnGuardar');
-	                var divError = $('#mensajeErrorTalla');
+                var valorNum = parseFloat(soloNumeros);
+                var btnGuardar = $('#btnGuardar');
+                var divError = $('#mensajeErrorTalla');
 
-	                if (!soloNumeros) {
-	                    input.removeClass('is-invalid');
-	                    divError.hide();
-	                    return;
-	                }
+                if (!soloNumeros) {
+                    input.removeClass('is-invalid');
+                    divError.hide();
+                    return;
+                }
 
-	                // Lógica de rango
-	                if (valorNum < TALLA_MIN || valorNum > TALLA_MAX) {
-	                    input.addClass('is-invalid'); // Borde rojo
-	                    // AQUÍ ESTABA EL EMOJI, YA LO QUITÉ:
-	                    divError.text('La talla permitida es entre ' + TALLA_MIN + ' y ' + TALLA_MAX).show();
-	                    btnGuardar.prop('disabled', true); // Bloquea botón
-	                } else {
-	                    input.removeClass('is-invalid');
-	                    input.addClass('is-valid');
-	                    divError.hide();
-	                    btnGuardar.prop('disabled', false); // Desbloquea botón
-	                }
-	            });
-	            
-	            // --- FOCUS AUTOMÁTICO ---
-	            $('#modalTalla').on('shown.bs.modal', function () {
-	                $('#nombre').trigger('focus');
-	            });
-	        });
+                if (valorNum < TALLA_MIN || valorNum > TALLA_MAX) {
+                    input.addClass('is-invalid');
+                    divError.text('La talla permitida es entre ' + TALLA_MIN + ' y ' + TALLA_MAX).show();
+                    btnGuardar.prop('disabled', true);
+                } else {
+                    input.removeClass('is-invalid').addClass('is-valid');
+                    divError.hide();
+                    btnGuardar.prop('disabled', false);
+                }
+            });
+            
+            $('#modalTalla').on('shown.bs.modal', function () {
+                $('#nombre').trigger('focus');
+            });
+        });
 
-	        // 3. VALIDACIÓN BOOTSTRAP GENERAL
-	        (function () {
-	          'use strict'
-	          var forms = document.querySelectorAll('.needs-validation')
-	          Array.prototype.slice.call(forms).forEach(function (form) {
-	              form.addEventListener('submit', function (event) {
-	                if (!form.checkValidity()) {
-	                  event.preventDefault(); event.stopPropagation();
-	                }
-	                form.classList.add('was-validated');
-	              }, false)
-	            })
-	        })();
+        (function () {
+          'use strict'
+          var forms = document.querySelectorAll('.needs-validation')
+          Array.prototype.slice.call(forms).forEach(function (form) {
+              form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) { event.preventDefault(); event.stopPropagation(); }
+                form.classList.add('was-validated');
+              }, false)
+            })
+        })();
 
-	        // 4. CARGAR DATOS (Editar)
-	        function cargarDatos(elemento) {
-	            var id = elemento.getAttribute('data-id');
-	            var nombre = elemento.getAttribute('data-nombre');
-	            document.getElementById('id_talla').value = id;
-	            document.getElementById('nombre').value = nombre;
-	            document.getElementById('modalTitle').innerText = "Editar Talla";
-	            
-	            // Limpiezas visuales
-	            $('#nombre').removeClass('is-invalid is-valid');
-	            $('#mensajeErrorTalla').hide();
-	            $('#btnGuardar').prop('disabled', false);
-	        }
+        function cargarDatos(elemento) {
+            var id = elemento.getAttribute('data-id');
+            var nombre = elemento.getAttribute('data-nombre');
+            document.getElementById('id_talla').value = id;
+            document.getElementById('nombre').value = nombre;
+            document.getElementById('modalTitle').innerText = "Editar Talla";
+            $('#nombre').removeClass('is-invalid is-valid');
+            $('#mensajeErrorTalla').hide();
+            $('#btnGuardar').prop('disabled', false);
+        }
 
-	        // 5. LIMPIAR MODAL
-	        function limpiarModal() {
-	            document.getElementById('id_talla').value = '';
-	            document.getElementById('nombre').value = '';
-	            document.getElementById('modalTitle').innerText = "Nueva Talla";
-	            document.querySelector('.needs-validation').classList.remove('was-validated');
-	            
-	            // Limpiezas visuales
-	            $('#nombre').removeClass('is-invalid is-valid');
-	            $('#mensajeErrorTalla').hide();
-	            $('#btnGuardar').prop('disabled', false);
-	        }
-	    </script>
+        function limpiarModal() {
+            document.getElementById('id_talla').value = '';
+            document.getElementById('nombre').value = '';
+            document.getElementById('modalTitle').innerText = "Nueva Talla";
+            document.querySelector('.needs-validation').classList.remove('was-validated');
+            $('#nombre').removeClass('is-invalid is-valid');
+            $('#mensajeErrorTalla').hide();
+            $('#btnGuardar').prop('disabled', false);
+        }
+    </script>
 
-	    <script th:if="${success != null}">
-	        Swal.fire({ icon: 'success', title: '¡Éxito!', text: "[(${success})]", confirmButtonColor: '#9a55ff' });
-	    </script>
-	    <script th:if="${error != null}">
-	        Swal.fire({ icon: 'error', title: 'Error', text: "[(${error})]", confirmButtonColor: '#d33' });
-	    </script>
-	    <script th:if="${info != null}">
-	        Swal.fire({ icon: 'info', title: 'Información', text: "[(${info})]", confirmButtonColor: '#9a55ff' });
-	    </script>
+    <script th:if="${success != null}">
+        Swal.fire({ icon: 'success', title: '¡Éxito!', text: "[(${success})]", confirmButtonColor: '#9a55ff' });
+    </script>
+    <script th:if="${error != null}">
+        Swal.fire({ icon: 'error', title: 'Error', text: "[(${error})]", confirmButtonColor: '#d33' });
+    </script>
 </body>
 </html>

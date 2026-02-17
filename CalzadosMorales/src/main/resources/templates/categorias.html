@@ -66,7 +66,7 @@
                                 <i class="mdi mdi-package-variant"></i>
                             </span> Gestión de Categorías
                         </h3>
-                        <button type="button" class="btn btn-gradient-primary btn-fw" onclick="limpiarModal()" data-bs-toggle="modal" data-bs-target="#modalCategoria">
+                        <button th:if="${rolId == 1}" type="button" class="btn btn-gradient-primary btn-fw" onclick="limpiarModal()" data-bs-toggle="modal" data-bs-target="#modalCategoria">
                             <i class="mdi mdi-plus"></i> Nueva Categoría
                         </button>
                     </div>
@@ -84,7 +84,7 @@
                                                     <th>ID</th>
                                                     <th>Nombre</th>
                                                     <th>Estado</th>
-                                                    <th>Acciones</th>
+                                                    <th th:if="${rolId == 1}">Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -97,7 +97,7 @@
                                                         <label class="badge badge-danger" th:unless="${cat.estado}">Inactivo</label>
                                                     </td>
                                                     
-                                                    <td>
+                                                    <td th:if="${rolId == 1}">
                                                         <div class="d-inline-flex align-items-center gap-2">
                                                             <div th:if="${cat.estado}">
                                                                 <button class="btn btn-sm btn-inverse-info btn-icon d-inline-flex align-items-center justify-content-center" 
@@ -182,7 +182,6 @@
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
     <script>
-        // 1. INICIALIZAR DATATABLES
         $(document).ready(function() {
             $('#tablaCategorias').DataTable({
                 "language": {
@@ -202,13 +201,11 @@
                 "pageLength": 10
             });
 			
-			// Al abrir el modal, poner el cursor en el campo nombre automáticamente
 			$('#modalCategoria').on('shown.bs.modal', function () {
 			    $('#nombre').trigger('focus');
 			});
         });
 
-        // 2. VALIDACIÓN BOOTSTRAP
         (function () {
           'use strict'
           var forms = document.querySelectorAll('.needs-validation')
@@ -224,7 +221,6 @@
             })
         })()
 
-        // 3. CARGAR DATOS
         function cargarDatos(elemento) {
             var id = elemento.getAttribute('data-id');
             var nombre = elemento.getAttribute('data-nombre');
@@ -234,7 +230,6 @@
             document.querySelector('.needs-validation').classList.remove('was-validated');
         }
 
-        // 4. LIMPIAR
         function limpiarModal() {
             document.getElementById('id_categoria').value = '';
             document.getElementById('nombre').value = '';
@@ -245,30 +240,13 @@
 
     <script th:if="${success != null}">
         Swal.fire({
-            icon: 'success',
-            title: '¡Éxito!',
-            text: "[(${success})]", 
-            confirmButtonColor: '#9a55ff'
+            icon: 'success', title: '¡Éxito!', text: "[(${success})]", confirmButtonColor: '#9a55ff'
         });
     </script>
-
     <script th:if="${error != null}">
         Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: "[(${error})]",
-            confirmButtonColor: '#d33'
+            icon: 'error', title: 'Error', text: "[(${error})]", confirmButtonColor: '#d33'
         });
     </script>
-
-    <script th:if="${info != null}">
-        Swal.fire({
-            icon: 'info',
-            title: 'Información',
-            text: "[(${info})]",
-            confirmButtonColor: '#9a55ff'
-        });
-    </script>
-
 </body>
 </html>

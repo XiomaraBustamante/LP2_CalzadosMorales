@@ -1,10 +1,11 @@
-package com.calzadosmorales.controller;
+package com.calzadosmorales.controller; 
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
+
 import com.calzadosmorales.entity.Usuario;
 import com.calzadosmorales.repository.UsuarioRepository;
 
@@ -17,9 +18,12 @@ public class GlobalControllerAdvice {
     @ModelAttribute
     public void addAttributes(Model model, Authentication auth) {
         if (auth != null && auth.isAuthenticated()) {
-            Usuario u = usuarioRepo.findByUsuario(auth.getName());
+            String username = auth.getName();
+            Usuario u = usuarioRepo.findByUsuario(username);
+            
             if (u != null) {
-                
+               
+                model.addAttribute("rolId", u.getRol().getId_rol());
                 model.addAttribute("userNombreCompleto", u.getNombre());
                 model.addAttribute("userRol", u.getRol().getNombre());
             }

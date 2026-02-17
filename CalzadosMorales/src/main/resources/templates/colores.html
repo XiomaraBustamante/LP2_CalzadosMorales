@@ -54,7 +54,7 @@
                             <span class="page-title-icon bg-gradient-primary text-white me-2">
                                 <i class="mdi mdi-palette"></i> </span> Gestión de Colores
                         </h3>
-                        <button type="button" class="btn btn-gradient-primary btn-fw" onclick="limpiarModal()" data-bs-toggle="modal" data-bs-target="#modalColor">
+                        <button th:if="${rolId == 1}" type="button" class="btn btn-gradient-primary btn-fw" onclick="limpiarModal()" data-bs-toggle="modal" data-bs-target="#modalColor">
                             <i class="mdi mdi-plus"></i> Nuevo Color
                         </button>
                     </div>
@@ -72,7 +72,7 @@
                                                     <th>ID</th>
                                                     <th>Nombre</th>
                                                     <th>Estado</th>
-                                                    <th>Acciones</th>
+                                                    <th th:if="${rolId == 1}">Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -85,7 +85,7 @@
                                                         <label class="badge badge-danger" th:unless="${col.estado}">Inactivo</label>
                                                     </td>
                                                     
-                                                    <td>
+                                                    <td th:if="${rolId == 1}">
                                                         <div class="d-inline-flex align-items-center gap-2">
                                                             <div th:if="${col.estado}">
                                                                 <button class="btn btn-sm btn-inverse-info btn-icon d-inline-flex align-items-center justify-content-center" 
@@ -162,90 +162,74 @@
     </div>
 
 	<script src="/assets/vendors/js/vendor.bundle.base.js"></script>
-	    <script src="/assets/js/off-canvas.js"></script>
-	    <script src="/assets/js/misc.js"></script>
+	<script src="/assets/js/off-canvas.js"></script>
+	<script src="/assets/js/misc.js"></script>
 	    
-	    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-	    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-	    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+	<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
-	    <script>
-	        // 1. INICIALIZAR DATATABLES
-	        $(document).ready(function() {
-	            $('#tablaColores').DataTable({
-	                "language": {
-	                    "lengthMenu": "Mostrar _MENU_ registros",
-	                    "zeroRecords": "No se encontraron coincidencias",
-	                    "info": "Página _PAGE_ de _PAGES_",
-	                    "infoEmpty": "Sin registros",
-	                    "infoFiltered": "(filtrado de _MAX_)",
-	                    "search": "Buscar:",
-	                    "paginate": { "first": "Primero", "last": "Último", "next": "Siguiente", "previous": "Anterior" }
-	                },
-	                "pageLength": 10
-	            });
-
-	           
-	            $('#nombre').on('input', function() {
-	                var valor = $(this).val();
-	                // Reemplaza cualquier cosa que NO sea letra (a-z), Ñ, acentos o espacios por "nada"
-	                var soloLetras = valor.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '');
-	                $(this).val(soloLetras);
-	            });
-				
-				// Al abrir el modal, poner el cursor en el campo nombre automáticamente
-				$('#modalColor').on('shown.bs.modal', function () {
-				    $('#nombre').trigger('focus');
-				});
+	<script>
+	    $(document).ready(function() {
+	        $('#tablaColores').DataTable({
+	            "language": {
+	                "lengthMenu": "Mostrar _MENU_ registros",
+	                "zeroRecords": "No se encontraron coincidencias",
+	                "info": "Página _PAGE_ de _PAGES_",
+	                "infoEmpty": "Sin registros",
+	                "infoFiltered": "(filtrado de _MAX_)",
+	                "search": "Buscar:",
+	                "paginate": { "first": "Primero", "last": "Último", "next": "Siguiente", "previous": "Anterior" }
+	            },
+	            "pageLength": 10
 	        });
-			
-			
-			
 
-	        // 2. VALIDACIÓN BOOTSTRAP (Campos vacíos)
-	        (function () {
-	          'use strict'
-	          var forms = document.querySelectorAll('.needs-validation')
-	          Array.prototype.slice.call(forms).forEach(function (form) {
-	              form.addEventListener('submit', function (event) {
-	                if (!form.checkValidity()) {
-	                  event.preventDefault(); event.stopPropagation();
-	                }
-	                form.classList.add('was-validated');
-	              }, false)
-	            })
-	        })();
+	        $('#nombre').on('input', function() {
+	            var valor = $(this).val();
+	            var soloLetras = valor.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '');
+	            $(this).val(soloLetras);
+	        });
+				
+			$('#modalColor').on('shown.bs.modal', function () {
+			    $('#nombre').trigger('focus');
+			});
+	    });
 
-	        // 3. CARGAR DATOS (Editar)
-	        function cargarDatos(elemento) {
-	            var id = elemento.getAttribute('data-id');
-	            var nombre = elemento.getAttribute('data-nombre');
-	            document.getElementById('id_color').value = id;
-	            document.getElementById('nombre').value = nombre;
-	            document.getElementById('modalTitle').innerText = "Editar Color";
-	            document.querySelector('.needs-validation').classList.remove('was-validated');
-	        }
+	    (function () {
+	      'use strict'
+	      var forms = document.querySelectorAll('.needs-validation')
+	      Array.prototype.slice.call(forms).forEach(function (form) {
+	          form.addEventListener('submit', function (event) {
+	            if (!form.checkValidity()) {
+	              event.preventDefault(); event.stopPropagation();
+	            }
+	            form.classList.add('was-validated');
+	          }, false)
+	        })
+	    })();
 
-	        // 4. LIMPIAR MODAL (Nuevo)
-	        function limpiarModal() {
-	            document.getElementById('id_color').value = '';
-	            document.getElementById('nombre').value = '';
-	            document.getElementById('modalTitle').innerText = "Nuevo Color";
-	            document.querySelector('.needs-validation').classList.remove('was-validated');
-	        }
-	    </script>
+	    function cargarDatos(elemento) {
+	        var id = elemento.getAttribute('data-id');
+	        var nombre = elemento.getAttribute('data-nombre');
+	        document.getElementById('id_color').value = id;
+	        document.getElementById('nombre').value = nombre;
+	        document.getElementById('modalTitle').innerText = "Editar Color";
+	        document.querySelector('.needs-validation').classList.remove('was-validated');
+	    }
 
-	    <script th:if="${success != null}">
-	        Swal.fire({ icon: 'success', title: '¡Éxito!', text: "[(${success})]", confirmButtonColor: '#9a55ff' });
-	    </script>
+	    function limpiarModal() {
+	        document.getElementById('id_color').value = '';
+	        document.getElementById('nombre').value = '';
+	        document.getElementById('modalTitle').innerText = "Nuevo Color";
+	        document.querySelector('.needs-validation').classList.remove('was-validated');
+	    }
+	</script>
 
-	    <script th:if="${error != null}">
-	        Swal.fire({ icon: 'error', title: 'Error', text: "[(${error})]", confirmButtonColor: '#d33' });
-	    </script>
-
-	    <script th:if="${info != null}">
-	        Swal.fire({ icon: 'info', title: 'Información', text: "[(${info})]", confirmButtonColor: '#9a55ff' });
-	    </script>
-
+	<script th:if="${success != null}">
+	    Swal.fire({ icon: 'success', title: '¡Éxito!', text: "[(${success})]", confirmButtonColor: '#9a55ff' });
+	</script>
+	<script th:if="${error != null}">
+	    Swal.fire({ icon: 'error', title: 'Error', text: "[(${error})]", confirmButtonColor: '#d33' });
+	</script>
 </body>
 </html>

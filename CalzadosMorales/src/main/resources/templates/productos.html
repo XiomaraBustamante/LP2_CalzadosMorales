@@ -12,23 +12,13 @@
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     
     <style>
-        /* Paginación Morada */
         .page-item.active .page-link { background-color: #9a55ff !important; border-color: #9a55ff !important; color: white !important; }
         .page-link { color: #9a55ff !important; }
-        
-        /* DataTable Bonito */
         .dataTables_length label { display: flex !important; align-items: center !important; margin-bottom: 1rem; }
         .dataTables_length select { background-color: #fff !important; border: 1px solid #ebedf2 !important; padding: 5px 25px 5px 10px !important; border-radius: 4px !important; margin: 0 10px !important; min-width: 70px; }
         .dataTables_filter input { border: 1px solid #ebedf2 !important; padding: 5px 10px !important; border-radius: 4px !important; margin-left: 0.5rem; }
         .dataTables_filter input:focus { border-color: #9a55ff !important; outline: none !important; }
-        
-        /* BOTONES CENTRADOS PERFECTOS */
-        .btn-icon-center {
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            width: 35px; height: 35px; padding: 0;
-        }
+        .btn-icon-center { display: inline-flex !important; align-items: center !important; justify-content: center !important; width: 35px; height: 35px; padding: 0; }
     </style>
 </head>
 <body>
@@ -47,7 +37,7 @@
                                 <i class="mdi mdi-shoe-sneaker"></i>
                             </span> Inventario de Productos
                         </h3>
-                        <button type="button" class="btn btn-gradient-primary btn-fw" onclick="abrirModalNuevo()">
+                        <button th:if="${rolId == 1}" type="button" class="btn btn-gradient-primary btn-fw" onclick="abrirModalNuevo()">
                             <i class="mdi mdi-plus"></i> Nuevo Producto
                         </button>
                     </div>
@@ -68,7 +58,7 @@
                                                     <th>Precio</th>
                                                     <th>Stock</th>
                                                     <th>Estado</th>
-                                                    <th>Acciones</th>
+                                                    <th th:if="${rolId == 1}">Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -90,7 +80,7 @@
                                                         <label class="badge badge-danger" th:unless="${p.estado}">Inactivo</label>
                                                     </td>
                                                     
-                                                    <td>
+                                                    <td th:if="${rolId == 1}">
                                                         <div th:if="${p.estado}" class="d-inline-flex gap-1">
                                                             <button class="btn btn-sm btn-inverse-info btn-icon-center" 
                                                                     onclick="cargarDatos(this)"
@@ -223,12 +213,9 @@
 
     <script>
         var myModal;
-
         $(document).ready(function() {
             var modalElement = document.getElementById('modalProducto');
-            if (modalElement) {
-                myModal = new bootstrap.Modal(modalElement);
-            }
+            if (modalElement) { myModal = new bootstrap.Modal(modalElement); }
 
             $('#tablaProductos').DataTable({
                 "language": {
@@ -243,26 +230,19 @@
                 "pageLength": 10
             });
             
-            // --- SCRIPT DE VALIDACIÓN (Bordes Rojos) ---
             (function () {
               'use strict'
               var forms = document.querySelectorAll('.needs-validation')
               Array.prototype.slice.call(forms).forEach(function (form) {
                 form.addEventListener('submit', function (event) {
-                  if (!form.checkValidity()) {
-                    event.preventDefault()
-                    event.stopPropagation()
-                  }
+                  if (!form.checkValidity()) { event.preventDefault(); event.stopPropagation(); }
                   form.classList.add('was-validated')
                 }, false)
               })
             })()
         });
 
-        function abrirModalNuevo() {
-            limpiarModal();
-            if(myModal) myModal.show();
-        }
+        function abrirModalNuevo() { limpiarModal(); if(myModal) myModal.show(); }
 
         function cargarDatos(btn) {
             document.getElementById('modalTitle').innerText = "Editar Producto";
@@ -285,11 +265,8 @@
             document.getElementById('descripcion').value = '';
             document.getElementById('precio').value = '';
             document.getElementById('stock').value = '';
-            
-            // Limpiar rojo
             var form = document.querySelector('.needs-validation');
             if (form) form.classList.remove('was-validated');
-
             ['categoria', 'talla', 'color', 'material'].forEach(function(id) {
                 var el = document.getElementById(id);
                 if(el && el.options.length > 0) el.selectedIndex = 0;

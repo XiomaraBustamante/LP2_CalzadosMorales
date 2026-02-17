@@ -54,7 +54,7 @@
                             <span class="page-title-icon bg-gradient-primary text-white me-2">
                                 <i class="mdi mdi-texture"></i> </span> Gestión de Materiales
                         </h3>
-                        <button type="button" class="btn btn-gradient-primary btn-fw" onclick="limpiarModal()" data-bs-toggle="modal" data-bs-target="#modalMaterial">
+                        <button th:if="${rolId == 1}" type="button" class="btn btn-gradient-primary btn-fw" onclick="limpiarModal()" data-bs-toggle="modal" data-bs-target="#modalMaterial">
                             <i class="mdi mdi-plus"></i> Nuevo Material
                         </button>
                     </div>
@@ -72,7 +72,7 @@
                                                     <th>ID</th>
                                                     <th>Nombre</th>
                                                     <th>Estado</th>
-                                                    <th>Acciones</th>
+                                                    <th th:if="${rolId == 1}">Acciones</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -85,7 +85,7 @@
                                                         <label class="badge badge-danger" th:unless="${mat.estado}">Inactivo</label>
                                                     </td>
                                                     
-                                                    <td>
+                                                    <td th:if="${rolId == 1}">
                                                         <div class="d-inline-flex align-items-center gap-2">
                                                             <div th:if="${mat.estado}">
                                                                 <button class="btn btn-sm btn-inverse-info btn-icon d-inline-flex align-items-center justify-content-center" 
@@ -171,7 +171,6 @@
 
     <script>
         $(document).ready(function() {
-            // 1. INICIALIZAR DATATABLES
             $('#tablaMateriales').DataTable({
                 "language": {
                     "lengthMenu": "Mostrar _MENU_ registros",
@@ -185,22 +184,17 @@
                 "pageLength": 10
             });
 
-            // 2. VALIDACIÓN: NO NÚMEROS (Solo letras y espacios)
             $('#nombre').on('input', function() {
                 var valor = $(this).val();
-                // Regex: Busca todo lo que NO sea letra (a-z, ñ, acentos) o espacio y lo borra.
-                // Esto elimina números y símbolos raros automáticamente.
                 var soloLetras = valor.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '');
                 $(this).val(soloLetras);
             });
 
-            // 3. FOCUS AUTOMÁTICO
             $('#modalMaterial').on('shown.bs.modal', function () {
                 $('#nombre').trigger('focus');
             });
         });
 
-        // 4. VALIDACIÓN BOOTSTRAP
         (function () {
           'use strict'
           var forms = document.querySelectorAll('.needs-validation')
@@ -214,7 +208,6 @@
             })
         })();
 
-        // 5. CARGAR DATOS
         function cargarDatos(elemento) {
             var id = elemento.getAttribute('data-id');
             var nombre = elemento.getAttribute('data-nombre');
@@ -224,7 +217,6 @@
             document.querySelector('.needs-validation').classList.remove('was-validated');
         }
 
-        // 6. LIMPIAR MODAL
         function limpiarModal() {
             document.getElementById('id_material').value = '';
             document.getElementById('nombre').value = '';
@@ -236,14 +228,8 @@
     <script th:if="${success != null}">
         Swal.fire({ icon: 'success', title: '¡Éxito!', text: "[(${success})]", confirmButtonColor: '#9a55ff' });
     </script>
-
     <script th:if="${error != null}">
         Swal.fire({ icon: 'error', title: 'Error', text: "[(${error})]", confirmButtonColor: '#d33' });
     </script>
-
-    <script th:if="${info != null}">
-        Swal.fire({ icon: 'info', title: 'Información', text: "[(${info})]", confirmButtonColor: '#9a55ff' });
-    </script>
-
 </body>
 </html>
